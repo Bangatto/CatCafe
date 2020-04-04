@@ -90,11 +90,15 @@ public class CatTree implements Iterable<CatInfo>{
            //check whether the root node is null and make the cat to add the root node
         	CatNode curNode = root;
         	if(curNode == null) {
-        		curNode =curNode.addCat(c);
+        		curNode = curNode.addCat(c);
+        	//case when the root node has a less seniority(higher monthHired) than our argument
         	}else if (curNode.data.monthHired > c.data.monthHired) {
         		curNode.senior = curNode.senior.addCat(c);
+        	//case when the root node has a higher seniority(less monthHired) than our argument
         	}else if (curNode.data.monthHired < c.data.monthHired) {
         		curNode.junior = curNode.junior.addCat(c);
+        	//case when the root node and argument have the same seniority, we compare their fur thickness
+        	//the thicker the fur, the more senior hence will be at the root and the less senior goes to same node.
         	}else if (curNode.data.monthHired == c.data.monthHired) {
         		if (curNode.data.furThickness > c.data.furThickness) {
         			curNode.same = curNode.same.addCat(c);
@@ -112,39 +116,46 @@ public class CatTree implements Iterable<CatInfo>{
         
         
         public CatNode removeCat(CatInfo c) {
-            //check if the node is empty and return this
-        	if (this.senior == null) {
-        		return this.senior;
+            //check if the node is empty and return the current node
+        	CatNode curNode = root;
+        	if (curNode == null) {
+        		return curNode;
         	}
-        	if (c.senior < this.senior) {
-        		this.senior.removeCat(c.data);
-        		
-        	}else if ( c.senior > this.senior) {
-        		this.junior.removeCat(c.data);
-        	}else {
-        		//cases where C is the root
-        		if (c.data.equals(this.data)) {
-        			if(c.same != null) {
-        				this.root = c.same.addCat(c.data);
-        				this.junior = c.same;
-        				this.senior = c.same;
-        			}else if( c.same == null && c.senior != null) {
-        				this.root = c.senior.addCat(c.data);
-        				this.senior = c.senior;
-        				this.junior = c.senior;
-        			}else {
-        				if(c.senior == null && c.same == null) {
-        					this.root = c.junior.addCat(c)
-        				}
+        	//case when curNode is not the argument to remove, check the senior node and the junior node
+        	if (curNode.data != c) {
+        		if(curNode.data.monthHired < c.monthHired) {
+        			curNode.senior = curNode.senior.removeCat(c);
+        		}else {
+        			if (curNode.data.monthHired > c.monthHired) {
+            			curNode.junior = curNode.junior.removeCat(c);
         			}
         		}
-        	}
+        	//The best case when the cat Node to remove is the root. We have 3 cases:
+        	}else {
+    			//case 1 :the root node has a another node with same seniority, c.same become the new root.
+    			if(curNode.same != null) {
+    				curNode.same.junior = curNode.junior;
+    				curNode.same.senior = curNode.senior;
+    			//case 2: the root node has no root.same and root.senior is not null, root.senior become the new root.
+    			}else if( curNode.same == null && curNode.senior != null) {
+    				root.data = curNode.senior.data;
+    				curNode.junior= curNode.junior.addCat(junior);
+    				
+    			//case 3: the root node has no root.same and root.senior is null, the root.junior become the new root.
+    			}else {
+    				if(curNode.senior == null && curNode.same == null) {
+    					root.data = curNode.junior.data;
+    				}
+    			}
+    		}
         	
-            return this.root; 
+        	
+            return root; 
         }
         
         
         public int mostSenior() {
+        	CatNode curNode = root;
         	//Case where the call is made on junior cat, the first cat will be the most senior
         	if (this.junior.monthHired.mostSenior()){
         		return this.data.monthHired
