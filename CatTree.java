@@ -150,43 +150,37 @@ public class CatTree implements Iterable<CatInfo>{
     		}
         	
         	
-            return root; 
+            return this; 
         }
         
         
         public int mostSenior() {
-        	CatNode curNode = root;
-        	//Case where the call is made on junior cat, the first cat will be the most senior
-        	if (this.junior.monthHired.mostSenior()){
-        		return this.data.monthHired
-        	}else { // case where the call is made on senior cat, the very last cat on the tree is the most senior
-        		while(this.senior != null) {
-        			this.senior = this.mostSenior()
-        		}
+        	//case when the root.senior is null, in this case we return root.monthHired,
+        	if (this.senior == null){
+        		return this.data.monthHired;
+        	}else {
+        		return this.senior.mostSenior();
+        	
         	}
-            return this.data.monthHired;
         }
         
         public int fluffiest() {
-            //case when the call is made on the same junior cat, the first junior cat has the fur thickenss
-        	if (this.senior == null ) {
-        		return this.data.furThickness;
-        	}else if ( this.junior.fluffiest()) {
-        		return this.data.FurThickness;
-        	}else {
-        		this.senior.fluffiest()        	}
-            return this.data.furThickness;
+        	int fur = this.data.furThickness;
+        	if(this.senior !=null)
+        		fur = Math.max(fur, this.senior.fluffiest());
+        	if (this.junior != null)
+        		fur = Math.max(fur, this.junior.fluffiest());
+        	return fur;
         }
         
         
         public int hiredFromMonths(int monthMin, int monthMax) {
         	// define a current node to act as a root node
-        	catNode curNode = this.root;
         	int hiredCount = 0;
         	//check if the monthMin is less than monthMax and return 0--> no cat was hired;
         	if (monthMin > monthMax) {
         		return 0;
-        	}else if (monthMin < curNode.data.monthHired && curNode.senior != null) {
+        	}else if (monthMin < this.data.monthHired && this.senior != null) {
         		hiredCount ++;
         		curNode = curNode.senior.hiredFromMonths(monthMin.junior, monthMax.senior);
         	}else if (monthMax > curNode.data.monthHired && curNode.junior ! null) {
@@ -203,7 +197,7 @@ public class CatTree implements Iterable<CatInfo>{
         
         public CatInfo fluffiestFromMonth(int month) {
            //check if the root node is null, we return the data for the root Node
-        	CatNode curNode = this.root;
+        	CatNode curNode = this;
         	if (curNode == null) {
         		return curNode.data
         	}
