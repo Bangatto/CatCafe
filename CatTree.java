@@ -165,6 +165,7 @@ public class CatTree implements Iterable<CatInfo>{
         }
         
         public int fluffiest() {
+        //initialize a variable to be the furthickness of the root node,compare it with senior&&junior furthickness
         	int fur = this.data.furThickness;
         	if(this.senior !=null)
         		fur = Math.max(fur, this.senior.fluffiest());
@@ -175,22 +176,26 @@ public class CatTree implements Iterable<CatInfo>{
         
         
         public int hiredFromMonths(int monthMin, int monthMax) {
-        	// define a current node to act as a root node
+        	//keep a counter to accumulate the number of month visited.
         	int hiredCount = 0;
         	//check if the monthMin is less than monthMax and return 0--> no cat was hired;
         	if (monthMin > monthMax) {
         		return 0;
-        	}else if (monthMin < this.data.monthHired && this.senior != null) {
-        		hiredCount ++;
-        		curNode = curNode.senior.hiredFromMonths(monthMin.junior, monthMax.senior);
-        	}else if (monthMax > curNode.data.monthHired && curNode.junior ! null) {
-        		hiredCount ++;
-        		curNode = curNode.junior.hiredFromMonths(monthMin.junior. monthMax.senior);
-        	}else {   // case where the cat is in the c.same branch
-        		hiredCount ++;
         	}
-        	//how to add the two separate counts together.
-        		
+        	//check if Monthmin == Monthmax and this.same is null, cat at the root was the only one hired.
+        	if( monthMin == monthMax && this.same == null) {
+        		return hiredCount ++;
+        	}
+        	//look for the monthMin on the senior side
+        	if (monthMin < this.data.monthHired && this.senior != null) {
+        		hiredCount ++;
+        		return this.senior.hiredFromMonths(monthMin, monthMax);
+        	}
+        	//look for max month on the junior side.
+        	if (monthMax > this.data.monthHired && this.junior != null) {
+        		hiredCount ++;
+        		return this.junior.hiredFromMonths(monthMin, monthMax);
+        	}
             return hiredCount;
             
         }
