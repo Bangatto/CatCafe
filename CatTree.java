@@ -88,63 +88,61 @@ public class CatTree implements Iterable<CatInfo>{
         
         public CatNode addCat(CatNode c) {
            //check whether the root node is null and make the cat to add the root node
-        	CatNode curNode = root;
-        	if(curNode == null) {
-        		curNode = curNode.addCat(c);
+        	if(this.senior == null) {
+        		this.senior = c;
         	//case when the root node has a less seniority(higher monthHired) than our argument
-        	}else if (curNode.data.monthHired > c.data.monthHired) {
-        		curNode.senior = curNode.senior.addCat(c);
+        	}else if (this.data.monthHired > c.data.monthHired) {
+        		this.senior = this.senior.addCat(c);
         	//case when the root node has a higher seniority(less monthHired) than our argument
-        	}else if (curNode.data.monthHired < c.data.monthHired) {
-        		curNode.junior = curNode.junior.addCat(c);
+        	}else if (this.data.monthHired < c.data.monthHired) {
+        		this.junior = this.junior.addCat(c);
         	//case when the root node and argument have the same seniority, we compare their fur thickness
         	//the thicker the fur, the more senior hence will be at the root and the less senior goes to same node.
-        	}else if (curNode.data.monthHired == c.data.monthHired) {
-        		if (curNode.data.furThickness > c.data.furThickness) {
-        			curNode.same = curNode.same.addCat(c);
+        	}else if (this.data.monthHired == c.data.monthHired) {
+        		if (this.data.furThickness > c.data.furThickness) {
+        			this.same = this.same.addCat(c);
         		}else {
             		 root = c;
-            		 c.senior = curNode.senior;
-            		 c.junior = curNode.junior;
-            		 c.same = curNode.same;
-            		 c.same.addCat(curNode);
+            		 c.senior = this.senior;
+            		 c.junior = this.junior;
+            		 c.same = this.same;
+            		 c.same.addCat(this);
         		}
         	}
         
-            return root; 
+            return this; 
         }
         
         
         public CatNode removeCat(CatInfo c) {
             //check if the node is empty and return the current node
-        	CatNode curNode = root;
-        	if (curNode == null) {
-        		return curNode;
+        	if (this == null) {
+        		return this;
         	}
-        	//case when curNode is not the argument to remove, check the senior node and the junior node
-        	if (curNode.data != c) {
-        		if(curNode.data.monthHired < c.monthHired) {
-        			curNode.senior = curNode.senior.removeCat(c);
+        	//case when this is not the argument to remove, check the senior node and the junior node
+        	if (this.data != c) {
+        		if(this.data.monthHired < c.monthHired) {
+        			this.senior = this.senior.removeCat(c);
         		}else {
-        			if (curNode.data.monthHired > c.monthHired) {
-            			curNode.junior = curNode.junior.removeCat(c);
+        			if (this.data.monthHired > c.monthHired) {
+            			this.junior = this.junior.removeCat(c);
         			}
         		}
         	//The best case when the cat Node to remove is the root. We have 3 cases:
         	}else {
     			//case 1 :the root node has a another node with same seniority, c.same become the new root.
-    			if(curNode.same != null) {
-    				curNode.same.junior = curNode.junior;
-    				curNode.same.senior = curNode.senior;
+    			if(this.same != null) {
+    				this.same.junior = this.junior;
+    				this.same.senior = this.senior;
     			//case 2: the root node has no root.same and root.senior is not null, root.senior become the new root.
-    			}else if( curNode.same == null && curNode.senior != null) {
-    				root.data = curNode.senior.data;
-    				curNode.junior= curNode.junior.addCat(junior);
+    			}else if( this.same == null && this.senior != null) {
+    				root.data = this.senior.data;
+    				this.junior= this.junior.addCat(junior);
     				
     			//case 3: the root node has no root.same and root.senior is null, the root.junior become the new root.
     			}else {
-    				if(curNode.senior == null && curNode.same == null) {
-    					root.data = curNode.junior.data;
+    				if(this.senior == null && this.same == null) {
+    					root.data = this.junior.data;
     				}
     			}
     		}
@@ -183,65 +181,106 @@ public class CatTree implements Iterable<CatInfo>{
         		return 0;
         	}
         	//check if Monthmin == Monthmax and this.same is null, cat at the root was the only one hired.
-        	if( monthMin == monthMax && this.same == null) {
+        	if( monthMin == monthMax && this.same != null) {
         		return hiredCount ++;
         	}
         	//look for the monthMin on the senior side
-        	if (monthMin < this.data.monthHired && this.senior != null) {
+        	if (monthMin < this.data.monthHired && monthMax > this.data.monthHired) {
         		hiredCount ++;
-        		return this.senior.hiredFromMonths(monthMin, monthMax);
-        	}
-        	//look for max month on the junior side.
-        	if (monthMax > this.data.monthHired && this.junior != null) {
-        		hiredCount ++;
-        		return this.junior.hiredFromMonths(monthMin, monthMax);
+        		if ( this.senior != null) {
+        			hiredCount += this.senior.hiredFromMonths(monthMin, monthMax);	
+        		}
+        		if ( this.junior != null) {
+        			hiredCount += this.junior.hiredFromMonths(monthMin, monthMax);	
+        		}
+        		if ( this.same != null) {
+        			hiredCount += this.same.hiredFromMonths(monthMin, monthMax);	
+        		}
         	}
             return hiredCount;
             
         }
         
         public CatInfo fluffiestFromMonth(int month) {
-           //check if the root node is null, we return the data for the root Node
-        	CatNode curNode = this;
-        	if (curNode == null) {
-        		return curNode.data
+        	//check whether monthhired equals the root node and return its data, its the mostfluffiest
+        	if (this.data.monthHired == month)
+        		return this.data;
+        	//chech the mostfluffiest on the senior side recursively
+        	else if( month < this.data.monthHired)
+        		return this.fluffiestFromMonth(month);
+        	//check the mostfluffiest on the junior side recursively
+        	else {
+        		return this.junior.fluffiestFromMonth(month);
         	}
-        	//check whether the root node has root.same and return the current root
-        	if(curNode.data.monthHired == month) {
-        		curNode = curNode.same.fluffiestFromMonth(month);
-        		return curNode.data;
-        	}else if(month < curNode.data.monthHired) {
-        		curNode = curNode.senior.fluffiestFromMonth(month);
-        		return curNode.data;
-        	}else {
-        		curNode = curNode.junior.fluffiestFromMonth(month);
-        		return curNode.data;
-        	}
-            return null; 
         }
         
         public int[] costPlanning(int nbMonths) {
-            // ADD YOUR CODE HERE
-            return null; // DON'T FORGET TO MODIFY THE RETURN IF NEED BE
+            int[] catCostArr = new int[nbMonths];
+            while(iterator().hasNext()) {
+            	 CatInfo cat =iterator().next();
+            	 if(cat.nextGroomingAppointment >= 243 && cat.nextGroomingAppointment < 243 + nbMonths) {
+            		 catCostArr[cat.nextGroomingAppointment-243] += cat.expectedGroomingCost;
+            	 }
+            }
+      
+            return catCostArr; 
         }
         
     }
     
     private class CatTreeIterator implements Iterator<CatInfo> {
-        // HERE YOU CAN ADD THE FIELDS YOU NEED
-        
+        //field attributes
+    	ArrayList<CatInfo> listOfCats; 
+    	CatInfo cat;
+    	int index;
+    	//use inorder traversal to access all the nodes of the Cat tree.
+    	private void inOrderTraversal(CatNode node) {
+    		//check whether the root node has senior and junior node
+    	 	if(node.senior == null && node.junior == null && node.same == null) {
+    		
+    			listOfCats.add(root.data);
+    			return;
+    		}
+    		
+    		//traversal over the most senior
+    		if( node.senior != null) {
+    			inOrderTraversal(node.senior);
+    		}
+    		if(node.same != null) {
+    			inOrderTraversal(node.same);
+    		}
+    		listOfCats.add(root.data);
+    														
+    		//check the junior side
+    		if(node.junior != null) {
+    			inOrderTraversal(node.junior);
+    		}
+    		listOfCats.add(root.data);
+    	}
         public CatTreeIterator() {
-            //YOUR CODE GOES HERE
+            listOfCats = new ArrayList<CatInfo>();
+            inOrderTraversal(root);
+            index = 0;
+            cat = listOfCats.get(index);
         }
         
         public CatInfo next(){
-            //YOUR CODE GOES HERE
-            return null; // DON'T FORGET TO MODIFY THE RETURN IF NEED BE
+        	if(index == listOfCats.size() - 1) {
+        		//index++;
+        		return cat;
+        	}else {
+        		CatInfo temp = cat;
+        		index++;
+        		cat = listOfCats.get(index);
+        		return temp;
+        	}
         }
         
         public boolean hasNext() {
-            //YOUR CODE GOES HERE
-            return false; // DON'T FORGET TO MODIFY THE RETURN IF NEED BE
+            if(index < listOfCats.size())
+            	return true;  
+          	return false; 
+            	
         }
     }
     
